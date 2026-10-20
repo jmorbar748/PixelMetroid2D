@@ -21,7 +21,7 @@ public class MovimientoJugador : MonoBehaviour
     private Vector2 entradaX;
     private bool saltoPendiente;
     private bool estaTocandoSuelo;
-    private float longitudRayCast = 1f;
+    private float longitudRayCast = 1.6f;
 
     // Start se ejecuta una sola vez (cuando el gameobject este activo en la escena y jugador tambien)
     // Awake se ejecuta aunque el script no este activo
@@ -40,6 +40,12 @@ public class MovimientoJugador : MonoBehaviour
         entradaX = accionMover.action.ReadValue<Vector2>();
 
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, longitudRayCast, capaSuelo);
+
+        estaTocandoSuelo = hit.collider != null;
+
+        Color colorRayo = estaTocandoSuelo ? Color.green : Color.red;
+
+        Debug.DrawRay(transform.position, Vector2.down * longitudRayCast, colorRayo);
 
         // Si se pulsa el botón, el salto pendiente se queda en true
         if(accionSaltar.action.WasPressedThisFrame() && estaTocandoSuelo)
