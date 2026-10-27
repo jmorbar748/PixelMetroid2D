@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -18,16 +19,24 @@ public class MovimientoJugador : MonoBehaviour
     [SerializeField] private LayerMask capaSuelo;
 
     private Rigidbody2D fisica;
+    private SpriteRenderer renderizador;
+    private Animator animador;
     private Vector2 entradaX;
     private bool saltoPendiente;
     private bool estaTocandoSuelo;
     private float longitudRayCast = 1.6f;
+    private float umbralCarrera = 0.1f;
 
     // Start se ejecuta una sola vez (cuando el gameobject este activo en la escena y jugador tambien)
     // Awake se ejecuta aunque el script no este activo
     private void Awake()
     {
         fisica = GetComponent<Rigidbody2D>();
+
+        renderizador = GetComponent<SpriteRenderer>();
+
+        animador = GetComponent<Animator>();
+
     }
     void Start()
     {
@@ -53,6 +62,26 @@ public class MovimientoJugador : MonoBehaviour
             saltoPendiente = true;
         }
 
+        AnimarJugador();
+
+    }
+
+    private void AnimarJugador()
+    {
+
+        if (animador == null)
+            return;
+
+        if (!estaTocandoSuelo)
+        {
+            animador.Play("JugadorSaltando");
+        }
+        else if (Mathf.Abs(fisica.linearVelocity.x) > 0)
+        {
+            animador.Play("JugadorCorriendo");
+        }
+        else
+            animador.Play("JugadorParado");
     }
 
     private void OnEnable()
@@ -106,6 +135,25 @@ public class MovimientoJugador : MonoBehaviour
         }
 
         saltoPendiente = false;
+
+        OrientarSprite();
+    }
+
+    private void OrientarSprite()
+    {
+
+        if (renderizador == null)
+            return;
+
+        if (fisica.linearVelocity.x > 0)
+        {
+            renderizador.flipX = false;
+        }
+        else if (fisica.linearVelocity.x < 0)
+        {
+            renderizador.flipX = true;
+        }
+
     }
 
 }

@@ -9,6 +9,7 @@ public class ControlEnemigo : MonoBehaviour
     private Vector2 posicionInicial;
     public Vector2 posicionFinal;
     private bool movimientoHaciaArriba = true;
+
     [SerializeField] private float tolerancia = 0.1f;
 
     private Rigidbody2D fisica;
