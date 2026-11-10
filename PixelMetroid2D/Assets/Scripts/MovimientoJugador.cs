@@ -21,7 +21,21 @@ public class MovimientoJugador : MonoBehaviour
     [Header("Reaparicion")]
     [SerializeField] private Transform spawnPoint;
 
+    [Header("Puntuación")]
+    [SerializeField] private int puntuacion;
 
+    [Header("Salud")]
+    [SerializeField] private int vidas = 3;
+    public int Vidas => vidas;
+    private Color colorOriginal;
+    private bool vulnerable = true;
+    [SerializeField, Min(0.01f)] private float segundosInvulnerable = 1f;
+
+    [Header("Tiempo")]
+    private float tiempoInicio;
+    private float tiempoReal;
+    [SerializeField] private int tiempoEmpleado;
+    [SerializeField, Min(1)] private int tiempoLimiteNivel = 100;
 
     private Rigidbody2D fisica;
     private SpriteRenderer renderizador;
@@ -45,7 +59,15 @@ public class MovimientoJugador : MonoBehaviour
     }
     void Start()
     {
-        
+
+        if (renderizador != null)
+            colorOriginal = renderizador.color;
+
+        else
+            Debug.LogError("");
+
+
+        tiempoInicio = Time.time;
     }
 
     void Update()
@@ -53,6 +75,31 @@ public class MovimientoJugador : MonoBehaviour
         // <- (-1,0) / (1,0) ->
         entradaX = accionMover.action.ReadValue<Vector2>();
 
+        ComprobarFinJuegoTiempo();
+
+        SaltoJugador();
+
+        AnimarJugador();
+
+    }
+
+    private void ComprobarFinJuegoTiempo()
+    {
+        int tiempoLimite;
+
+        tiempoReal = Time.time - tiempoInicio;
+        tiempoEmpleado = Mathf.FloorToInt(tiempoReal);
+
+        if (tiempoEmpleado >= tiempoLimiteNivel)
+        {
+            FinJuego();
+            return;
+        }
+
+    }
+
+    private void SaltoJugador()
+    {
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, longitudRayCast, capaSuelo);
 
         estaTocandoSuelo = hit.collider != null;
@@ -62,13 +109,10 @@ public class MovimientoJugador : MonoBehaviour
         Debug.DrawRay(transform.position, Vector2.down * longitudRayCast, colorRayo);
 
         // Si se pulsa el botón, el salto pendiente se queda en true
-        if(accionSaltar.action.WasPressedThisFrame() && estaTocandoSuelo)
+        if (accionSaltar.action.WasPressedThisFrame() && estaTocandoSuelo)
         {
             saltoPendiente = true;
         }
-
-        AnimarJugador();
-
     }
 
     private void AnimarJugador()
@@ -131,6 +175,15 @@ public class MovimientoJugador : MonoBehaviour
 
     private void FixedUpdate()
     {
+        
+        MoverJugador();
+
+        OrientarSprite();
+        
+    }
+
+    private void MoverJugador()
+    {
         // Se multiplica ((nuestra entrada izquierda -1 derecha +1) * (velocity = velocidad que hayamos impuesto))
         fisica.linearVelocity = new Vector2(entradaX.x * velocity, fisica.linearVelocity.y);
 
@@ -140,8 +193,6 @@ public class MovimientoJugador : MonoBehaviour
         }
 
         saltoPendiente = false;
-
-        OrientarSprite();
     }
 
     private void OrientarSprite()
@@ -175,6 +226,46 @@ public class MovimientoJugador : MonoBehaviour
         fisica.position = (Vector2)spawnPoint.position;
         fisica.linearVelocity = Vector2.zero;
 
+    }
+
+    public void IncrementarPuntos(int cantidad)
+    {
+        if (cantidad <= 0) return;
+
+        puntuacion += cantidad;
+    }
+
+    public void QuitarVida()
+    {
+        if (!vulnerable) return;
+        vulnerable = false;
+        vidas--;
+
+        if(renderizador != null)
+        {
+            renderizador.color = Color.blue;
+        }
+
+        if(vidas <= 0)
+        {
+            FinJuego();
+            return;
+        }
+
+        Invoke(nameof(HacerVulnerable), segundosInvulnerable);
+    }
+
+    private void HacerVulnerable()
+    {
+        vulnerable = true;
+        if (renderizador != null)
+            renderizador.color = colorOriginal;
+    }
+
+    private void FinJuego()
+    {
+        Debug.Log("Juego finalizado");
+        gameObject.SetActive(false);
     }
 
 }

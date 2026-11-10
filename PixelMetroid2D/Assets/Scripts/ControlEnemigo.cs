@@ -99,7 +99,8 @@ public class ControlEnemigo : MonoBehaviour
 
         if (colision.gameObject.TryGetComponent(out MovimientoJugador jugador))
         {
-            jugador.ReaparecerJugador();
+            //jugador.ReaparecerJugador();
+            jugador.QuitarVida();
         }
 
         Debug.LogError("El objeto Player necesita ControlJugador en la raíz.");
