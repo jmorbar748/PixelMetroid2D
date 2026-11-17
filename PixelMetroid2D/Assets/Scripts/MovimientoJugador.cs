@@ -35,7 +35,11 @@ public class MovimientoJugador : MonoBehaviour
     private float tiempoInicio;
     private float tiempoReal;
     [SerializeField] private int tiempoEmpleado;
-    [SerializeField, Min(1)] private int tiempoLimiteNivel = 100;
+    [SerializeField, Min(0.01f)] private int tiempoLimiteNivel = 100;
+
+    [Header("Canvas")]
+    [SerializeField] private Canvas canvasInterfaz;
+    private ControlHUD hud;
 
     private Rigidbody2D fisica;
     private SpriteRenderer renderizador;
@@ -68,6 +72,8 @@ public class MovimientoJugador : MonoBehaviour
 
 
         tiempoInicio = Time.time;
+
+        InicializaHud();
     }
 
     void Update()
@@ -83,12 +89,35 @@ public class MovimientoJugador : MonoBehaviour
 
     }
 
+    private void InicializaHud()
+    {
+
+        if (canvasInterfaz != null)
+        {
+            hud = canvasInterfaz.GetComponent<ControlHUD>();
+        }
+        else
+            Debug.LogError("Asigna el objeto Canvas con el componente ControlHUD al atributo Canvas del Jugador.");
+
+        if (hud != null)
+        {
+            hud.SetVidas(vidas);
+            hud.SetTiempo(tiempoLimiteNivel);
+            hud.SetPowerUps(GameObject.FindGameObjectsWithTag("PowerUp").Length);
+        }
+        else
+            Debug.LogError("Asigna el objeto Canvas con el componente ControlHUD al atributo Canvas del Jugador.");
+
+    }
+
     private void ComprobarFinJuegoTiempo()
     {
         int tiempoLimite;
 
         tiempoReal = Time.time - tiempoInicio;
         tiempoEmpleado = Mathf.FloorToInt(tiempoReal);
+        int segundosRestantes = Mathf.CeilToInt(tiempoLimiteNivel - tiempoReal);
+        hud.SetTiempo(segundosRestantes);
 
         if (tiempoEmpleado >= tiempoLimiteNivel)
         {
@@ -233,6 +262,9 @@ public class MovimientoJugador : MonoBehaviour
         if (cantidad <= 0) return;
 
         puntuacion += cantidad;
+
+        hud.SetPowerUps(GameObject.FindGameObjectsWithTag("PowerUp").Length - 1);
+
     }
 
     public void QuitarVida()
@@ -240,6 +272,8 @@ public class MovimientoJugador : MonoBehaviour
         if (!vulnerable) return;
         vulnerable = false;
         vidas--;
+
+        hud.SetVidas(vidas);
 
         if(renderizador != null)
         {

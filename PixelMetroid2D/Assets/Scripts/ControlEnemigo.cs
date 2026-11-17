@@ -103,7 +103,8 @@ public class ControlEnemigo : MonoBehaviour
             jugador.QuitarVida();
         }
 
-        Debug.LogError("El objeto Player necesita ControlJugador en la raíz.");
+        else
+            Debug.LogError("El objeto Player necesita ControlJugador en la raíz.");
 
     }
 
