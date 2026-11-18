@@ -68,7 +68,7 @@ public class MovimientoJugador : MonoBehaviour
             colorOriginal = renderizador.color;
 
         else
-            Debug.LogError("");
+            Debug.LogError("El jugador no tiene asignado el objeto Sprite Renderer.");
 
 
         tiempoInicio = Time.time;
